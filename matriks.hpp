@@ -49,5 +49,22 @@ class Matriks
 			}
 			myfile.close();
 		}
+		
+		void writeMatriks(int value)
+		{
+			myfile.open ("matriks.txt");
+			for(int i = 0; i < size; i++)
+			{
+				for (int j = 0; j < size; j++)
+				{
+					if(j == 0)
+						myfile << value;
+					else
+						myfile << " " << value;
+				}
+				myfile << "\n";
+			}
+			myfile.close();
+		}
 };
 #endif
