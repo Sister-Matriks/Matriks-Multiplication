@@ -16,17 +16,22 @@ class Matriks
 		int randNumber;
 		
 	public:
+		Matriks()
+		{
+			size = 4;
+		}
+		
 		Matriks(int _N)
 		{
 			size	= _N;
 			
 		}
-		void setMatriksSize(int _N)
+		void setSize(int _N)
 		{
 			size	= _N;
 		}
 		
-		int getMatriksSize()
+		int getSize()
 		{
 			return size;
 		}
