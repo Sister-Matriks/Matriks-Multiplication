@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <cstdlib>
+#include <time.h>
 #include "mpi.h"
 #include "matriks.hpp"
 
@@ -34,18 +35,9 @@ int main(int argc, char** argv)
 	if(rank == 0) //Inisialisasi matriks kanan
 	{
 		/* inisialisasi */
-		printf("\nno. of processes = %d\n", size);
+		printf("\nno. of process = %d\n", size);
 		printf("matrix size = %d\n", sizeMatriks);
-		
-		/*for(int i = 0; i < sizeMatriks; i++)
-		{
-			for(int j = 0; j < sizeMatriks; j++)
-			{
-				matriksKanan[i][j] = i;
-				matriksKiri[i][j] = i * size;
-			}
-		}*/
-		
+
 		Matriks matriks;
 	
 		if(argv[1] == NULL)
@@ -110,7 +102,10 @@ int main(int argc, char** argv)
 	if(rank == 0) //Jika idProcess = idmaster = 0
 	{
 		int matriksResult [sizeMatriks][sizeMatriks];
+		clock_t begin, end;
+		double timeSpent;
 		
+		begin = clock();
 		int offset = 0;
 		for(int dest = 1; dest < size; dest++)
 		{
@@ -134,6 +129,9 @@ int main(int argc, char** argv)
 				matriksResult[i][j] = sum;
 			}
 		}
+		
+		end = clock();
+		timeSpent = (double)(1000 * (end - begin)) / CLOCKS_PER_SEC;
 			
 		printf("\nMatriks hasil perkalian (kiri X kanan):\n");
 		for(int i = 0; i < sizeMatriks; i++)
@@ -147,6 +145,8 @@ int main(int argc, char** argv)
 			}
 			printf("\n");
 		}
+		
+		printf("\nProcessing time: %f ms\n\n", timeSpent);
 		
 	}
 	else
