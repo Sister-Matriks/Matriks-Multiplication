@@ -22,6 +22,8 @@ int main(int argc, char** argv)
 	
 	int matriksKanan [sizeMatriks][sizeMatriks];
 	int matriksKiri [sizeMatriks][sizeMatriks];
+	int **matriksKananTemp;
+	int **matriksKiriTemp;
 	
 	if(size <= sizeMatriks){
 		rowSent = sizeMatriks / size;
@@ -62,8 +64,17 @@ int main(int argc, char** argv)
 				matriks.writeMatriks();
 		}
 		
-		matriksKanan = matriks.read(sizeMatriks);
-		matriksKiri = matriks.read(sizeMatriks, true);
+		matriksKananTemp = matriks.read(sizeMatriks);
+		matriksKiriTemp = matriks.read(sizeMatriks, true);
+		
+		for(int i = 0; i < sizeMatriks; i++)
+		{
+			for(int j = 0; j < sizeMatriks; j++)
+			{
+				matriksKanan[i][j] = matriksKananTemp[i][j];
+				matriksKiri[i][j] = matriksKiriTemp[i][j];
+			}
+		}
 		
 		/* cetak matriks kanan*/
 		printf("\nMatriks kanan:\n");
