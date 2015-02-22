@@ -20,7 +20,12 @@ int main(int argc, char** argv)
 	
 	int matriksKanan [sizeMatriks][sizeMatriks];
 	int matriksKiri [sizeMatriks][sizeMatriks];
-	rowSent = sizeMatriks / size;
+	
+	if(size <= sizeMatriks){
+		rowSent = sizeMatriks / size;
+	}else{
+		rowSent = 1;
+	}
 		
 	if(rank == 0) //Inisialisasi matriks kanan
 	{
@@ -72,10 +77,10 @@ int main(int argc, char** argv)
 	{
 		int matriksResult [sizeMatriks][sizeMatriks];
 		
-		if(size <= sizeMatriks){
-			int offset = 0;
-			for(int dest = 1; dest < size; dest++)
-			{
+		int offset = 0;
+		for(int dest = 1; dest < size; dest++)
+		{
+			if(dest < sizeMatriks){
 				offset = dest * rowSent;
 				//printf("offset before sending ke process %d = %d\n", dest, offset);
 				//printf("Sending mpi_send from process %d to %d\n", rank, dest);
@@ -83,19 +88,17 @@ int main(int argc, char** argv)
 				//printf("Message Sent \n");
 				MPI_Recv(&matriksResult[offset][0], rowSent * sizeMatriks, MPI_INT, dest, tag, MPI_COMM_WORLD, &status);
 			}
-			
-			// matrix multiplication calculation for process-0
-			for(int i = 0; i < sizeMatriks / size; i++){
-				for(int j = 0; j < sizeMatriks; j++){
-					int sum = 0;
-					for(int k = 0; k < sizeMatriks; k++){
-						sum = sum + matriksKiri[i][k] * matriksKanan[k][j]; 
-					}
-					matriksResult[i][j] = sum;
+		}
+		
+		// matrix multiplication calculation for process-0
+		for(int i = 0; i < rowSent; i++){
+			for(int j = 0; j < sizeMatriks; j++){
+				int sum = 0;
+				for(int k = 0; k < sizeMatriks; k++){
+					sum = sum + matriksKiri[i][k] * matriksKanan[k][j]; 
 				}
+				matriksResult[i][j] = sum;
 			}
-		}else{
-			
 		}
 			
 		printf("\nMatriks hasil perkalian (kiri X kanan):\n");
@@ -114,29 +117,30 @@ int main(int argc, char** argv)
 	}
 	else
 	{
-		int matriksKiriRecv [rowSent][sizeMatriks];
-		int offsetRecv = rank * rowSent;
-		
-		int matriksResult [rowSent][sizeMatriks];
-		
-		//printf("process %d Receiving mpi_recv from %d\n",rank, mainProcess);
-		//printf("offset = %d\n", offsetRecv);
-		MPI_Recv(&matriksKiriRecv[0][0], rowSent * sizeMatriks, MPI_INT, mainProcess, tag, MPI_COMM_WORLD, &status);
-		//printf("Message Recv \n");
-		
-		// matrix multiplication calculation
-		for(int i = 0; i < sizeMatriks / size; i++){
-			for(int j = 0; j < sizeMatriks; j++){
-				int sum = 0;
-				for(int k = 0; k < sizeMatriks; k++){
-					sum = sum + matriksKiriRecv[i][k] * matriksKanan[k][j]; 
+		if(rank < sizeMatriks){
+			int matriksKiriRecv [rowSent][sizeMatriks];
+			int offsetRecv = rank * rowSent;
+			
+			int matriksResult [rowSent][sizeMatriks];
+			
+			//printf("process %d Receiving mpi_recv from %d\n",rank, mainProcess);
+			//printf("offset = %d\n", offsetRecv);
+			MPI_Recv(&matriksKiriRecv[0][0], rowSent * sizeMatriks, MPI_INT, mainProcess, tag, MPI_COMM_WORLD, &status);
+			//printf("Message Recv \n");
+			
+			// matrix multiplication calculation
+			for(int i = 0; i < rowSent; i++){
+				for(int j = 0; j < sizeMatriks; j++){
+					int sum = 0;
+					for(int k = 0; k < sizeMatriks; k++){
+						sum = sum + matriksKiriRecv[i][k] * matriksKanan[k][j]; 
+					}
+					matriksResult[i][j] = sum;
 				}
-				matriksResult[i][j] = sum;
-			}
-		}	
-		
-		MPI_Send(&matriksResult[0][0], rowSent * sizeMatriks, MPI_INT, mainProcess, tag, MPI_COMM_WORLD);
-
+			}	
+			
+			MPI_Send(&matriksResult[0][0], rowSent * sizeMatriks, MPI_INT, mainProcess, tag, MPI_COMM_WORLD);
+		}
 	}
 	MPI_Finalize();
 	return 0;
