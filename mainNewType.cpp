@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <cstdlib>
 #include "mpi.h"
+#include "matriks.hpp"
 
 using namespace std;
 
@@ -9,7 +10,8 @@ int main(int argc, char** argv)
 	int i, j, rank, size, mainProcess, tag, rowSent;
 	int sizeMatriks = atoi(argv[1]);
 	MPI_Status status;
-
+	
+	/* Inisialisasi MPI */
 	MPI_Init(&argc, &argv);
 	MPI_Comm_rank(MPI_COMM_WORLD, &rank);
 	MPI_Comm_size(MPI_COMM_WORLD, &size);
@@ -33,14 +35,35 @@ int main(int argc, char** argv)
 		printf("\nno. of processes = %d\n", size);
 		printf("matrix size = %d\n", sizeMatriks);
 		
-		for(int i = 0; i < sizeMatriks; i++)
+		/*for(int i = 0; i < sizeMatriks; i++)
 		{
 			for(int j = 0; j < sizeMatriks; j++)
 			{
 				matriksKanan[i][j] = i;
 				matriksKiri[i][j] = i * size;
 			}
+		}*/
+		
+		Matriks matriks;
+	
+		if(argv[1] == NULL)
+		{
+			printf("Argumen program harus ada, minimal 1. Baca kembali readme program\n");
+			exit(1);
+		}		
+		else
+		{
+			matriks.setSize(atoi(argv[1]));
+			if(argv[2] != NULL)
+			{
+				matriks.writeMatriks(atoi(argv[2]));
+			}
+			else
+				matriks.writeMatriks();
 		}
+		
+		matriksKanan = matriks.read(sizeMatriks);
+		matriksKiri = matriks.read(sizeMatriks, true);
 		
 		/* cetak matriks kanan*/
 		printf("\nMatriks kanan:\n");
