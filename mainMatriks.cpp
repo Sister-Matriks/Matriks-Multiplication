@@ -35,5 +35,18 @@ int main(int argc,char *argv[]) {
 	else
 		matriks.writeMatriks();
 	
+	int **matriksN;
+	if(argv[1] == NULL)
+	{
+		matriksN = matriks.read();
+		matriks.cetak(matriksN);
+	}
+	else
+	{
+		matriksN = matriks.read(atoi(argv[1]));
+		matriks.cetak(matriksN, atoi(argv[1]));
+	}
+		
+	
 	return 0;
 }
