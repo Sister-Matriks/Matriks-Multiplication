@@ -54,6 +54,19 @@ class Matriks
 				}
 				myfile << "\n";
 			}
+			
+			for(int i = 0; i < size; i++)
+			{
+				for (int j = 0; j < size; j++)
+				{
+					randNumber = rand() % 19 + (-9);
+					if(j == 0)
+						myfile << randNumber;
+					else
+						myfile << " " << randNumber;
+				}
+				myfile << "\n";
+			}
 			myfile.close();
 		}
 		
@@ -71,6 +84,19 @@ class Matriks
 				}
 				myfile << "\n";
 			}
+			
+			for(int i = 0; i < size; i++)
+			{
+				for (int j = 0; j < size; j++)
+				{
+					if(j == 0)
+						myfile << value;
+					else
+						myfile << " " << value;
+				}
+				myfile << "\n";
+			}
+			
 			myfile.close();
 		}
 		
@@ -105,7 +131,7 @@ class Matriks
 			}
 		}
 		
-		int** read(int size)
+		int** readAll(int size)
 		{
 			int ** matriks;
 			in_stream.open("matriks.txt");
@@ -124,7 +150,7 @@ class Matriks
 					in_stream >> number;
 					matriks[i][j] = atoi(number.c_str());
 				}
-				if(counter == size*size)
+				if(counter == 2*size*size)
 					break;
 				else
 					counter++;
@@ -160,6 +186,85 @@ class Matriks
 			}
 			in_stream.close();
 			return matriks;
+		}
+		
+		int** read(int size)
+		{
+			int ** matriks;
+			in_stream.open("matriks.txt");
+			matriks = new int*[size];
+			for(int i = 0; i < size; i++)
+			{
+				matriks[i] = new int[size];
+			}
+			string number;
+			int i=0, j=0, counter = 0;
+			
+			for(i = 0; i < size; i++)
+			{
+				for(j = 0; j < size; j++)
+				{
+					in_stream >> number;
+					matriks[i][j] = atoi(number.c_str());
+				}
+				if(counter == size*size)
+					break;
+				else
+					counter++;
+			}
+			in_stream.close();
+			return matriks;
+		}
+		int** read(int size, bool second)
+		{
+			if(second)
+			{
+				int ** matriks;
+				in_stream.open("matriks.txt");
+				matriks = new int*[size];
+				for(int i = 0; i < size; i++)
+				{
+					matriks[i] = new int[size];
+				}
+				string number;
+				int i=0, j=0, counter = 0;
+				
+				//Skipping first matriks in txt
+				for(i = 0; i < size; i++)
+				{
+					for(j = 0; j < size; j++)
+					{
+						in_stream >> number;
+					}
+					if(counter == size*size)
+						break;
+					else
+						counter++;
+				}
+				
+				//Add second matriks
+				counter = 0;
+				for(i = 0; i < size; i++)
+				{
+					for(j = 0; j < size; j++)
+					{
+						in_stream >> number;
+						matriks[i][j] = atoi(number.c_str());
+					}
+					if(counter == size*size)
+						break;
+					else
+						counter++;
+				}
+				
+				in_stream.close();
+				return matriks;
+			}
+			else{
+				printf("Parameter kedua harus true\n");
+				exit(1);
+			}
+				
 		}
 };
 #endif
