@@ -84,12 +84,12 @@ int main(int argc, char** argv)
 	else
 	{
 		int matriksKananRecv [sizeMatriks][sizeMatriks];
-		int matriksKiriRecv [sizeMatriks / size][sizeMatriks];
+		int matriksKiriRecv [rowSent][sizeMatriks];
 		int offsetRecv = rank * rowSent;
 		
 		printf("process %d Receiving mpi_recv from %d\n",rank, src);
 		printf("offset = %d\n", offsetRecv);
-		MPI_Recv(&matriksKiriRecv[offsetRecv][0], rowSent * sizeMatriks, MPI_INT, src, tag, MPI_COMM_WORLD, &status);
+		MPI_Recv(&matriksKiriRecv[0][0], rowSent * sizeMatriks, MPI_INT, src, tag, MPI_COMM_WORLD, &status);
 		printf("Message Recv \n");
 		
 		/* cetak matriks kanan*/
