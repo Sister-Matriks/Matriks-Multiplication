@@ -6,7 +6,7 @@ using namespace std;
 
 int main(int argc, char** argv)
 {
-	int i, j, rank, size, dest, src, tag, base, blocklen[2];
+	int i, j, rank, size, src, tag, rowSent;
 	int sizeMatriks = atoi(argv[1]);
 	MPI_Status status;
 
@@ -16,11 +16,11 @@ int main(int argc, char** argv)
 	
 	/* Inisialisasi dest and src */
 	src = 0;
-	dest = 1;
 	tag = 0;
 	
 	int matriksKanan [sizeMatriks][sizeMatriks];
-	int matriksKiri [sizeMatriks / size][sizeMatriks];
+	int matriksKiri [sizeMatriks][sizeMatriks];
+	rowSent = sizeMatriks / size;
 		
 	if(rank == 0) //Inisialisasi matriks kanan
 	{
@@ -34,10 +34,7 @@ int main(int argc, char** argv)
 			for(int j = 0; j < sizeMatriks; j++)
 			{
 				matriksKanan[i][j] = i;
-				if(i < sizeMatriks / size)
-				{
-					matriksKiri[i][j] = i;
-				}
+				matriksKiri[i][j] = i * size;
 			}
 		}
 		
@@ -61,7 +58,6 @@ int main(int argc, char** argv)
 		{
 			for (int j = 0; j < sizeMatriks; j++)
 			{
-				if(i < sizeMatriks / size)
 					if(j == 0)
 						printf("%d", matriksKiri[i][j]);
 					else
@@ -75,17 +71,25 @@ int main(int argc, char** argv)
 	
 	if(rank == 0) //Jika idProcess = idmaster = 0
 	{
-		printf("Sending mpi_send from process %d to %d\n", rank, dest);
-		MPI_Send(&matriksKiri[0][0], sizeMatriks / size * sizeMatriks, MPI_INT, dest, tag, MPI_COMM_WORLD);
-		printf("Message Sent \n");
+		int offset = 0;
+		for(int dest = 1; dest < size; dest++)
+		{
+			offset = dest * rowSent;
+			printf("offset before sending ke process %d = %d\n", dest, offset);
+			printf("Sending mpi_send from process %d to %d\n", rank, dest);
+			MPI_Send(&matriksKiri[offset][0], rowSent * sizeMatriks, MPI_INT, dest, tag, MPI_COMM_WORLD);
+			printf("Message Sent \n");
+		}
 	}
 	else
 	{
 		int matriksKananRecv [sizeMatriks][sizeMatriks];
 		int matriksKiriRecv [sizeMatriks / size][sizeMatriks];
+		int offsetRecv = rank * rowSent;
 		
 		printf("process %d Receiving mpi_recv from %d\n",rank, src);
-		MPI_Recv(&matriksKiriRecv[0][0], sizeMatriks / size * sizeMatriks, MPI_INT, src, tag, MPI_COMM_WORLD, &status);
+		printf("offset = %d\n", offsetRecv);
+		MPI_Recv(&matriksKiriRecv[offsetRecv][0], rowSent * sizeMatriks, MPI_INT, src, tag, MPI_COMM_WORLD, &status);
 		printf("Message Recv \n");
 		
 		/* cetak matriks kanan*/
@@ -103,7 +107,7 @@ int main(int argc, char** argv)
 		}
 		
 		/* cetak matriks kiri*/
-		printf("\nMatriks kiri after sending\n");
+		printf("\nMatriks kiri after sending, ditulis oleh process ke %d\n", rank);
 		for(int i = 0; i < sizeMatriks / size; i++)
 		{
 			for (int j = 0; j < sizeMatriks; j++)
